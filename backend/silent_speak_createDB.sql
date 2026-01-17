@@ -16,12 +16,14 @@ CREATE TABLE users (
 );
 
 ## Table Store all user progress {ID, level type, level number,  }
-CREATE TABLE IF NOT EXISTS user_progress (
+
+CREATE TABLE user_progress (
     user_id INT PRIMARY KEY,
-    level_type VARCHAR(100) not Null,
+    level_type VARCHAR(100) NOT NULL DEFAULT 'beginner',
     level_number INT NOT NULL DEFAULT 1,
     streak INT NOT NULL DEFAULT 0,
     last_activity DATE NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_user_progress_user
       FOREIGN KEY (user_id) REFERENCES users(id)
