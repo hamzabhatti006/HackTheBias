@@ -1,21 +1,12 @@
 from signup import signup_user
 
-print("=== TEST SIGNUP ===")
+test_payload = {
+    "name": "John Doe",
+    "username": "johndoe",
+    "email": "boudyattia1@gmail.com",
+    "confirm_email": "boudyattia1@gmail.com",
+    "password": "StrongPassword123!"
+}
 
-name = input("Name: ")
-username = input("Username: ")
-email = input("Email: ")
-confirm_email = input("Confirm Email: ")
-password = input("Password: ")
-
-success, message = signup_user(
-    name=name,
-    username=username,
-    email=email,
-    confirm_email=confirm_email,
-    password=password
-)
-
-print("\nRESULT:")
-print("Success:", success)
-print("Message:", message)
+response = signup_user(test_payload)
+print(response)

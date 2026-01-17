@@ -1,8 +1,7 @@
 import mysql.connector
 import bcrypt
-import json
 
-# Data base Configuration: Use person credintials 
+# ---------- DATABASE CONFIG ----------
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
@@ -11,8 +10,24 @@ DB_CONFIG = {
     "port": 3306
 }
 
-# Login logic: Take username and password from frontend and return login status and message
-def login_user(username: str, password: str):
+# ---------- LOGIN (JSON IN / JSON OUT) ----------
+def login_user(payload: dict) -> dict:
+    """
+    Expected payload:
+    {
+      "username": "johndoe",
+      "password": "StrongPassword123!"
+    }
+    """
+
+    username = payload.get("username")
+    password = payload.get("password")
+
+    if not username or not password:
+        return {
+            "login": False
+        }
+
     try:
         connection = mysql.connector.connect(**DB_CONFIG)
         cursor = connection.cursor()
@@ -27,33 +42,28 @@ def login_user(username: str, password: str):
 
         if not result:
             return {
-                "login": False,
-                "message": "User does not exist"
+                "login": False
             }
 
         stored_hash, email_verified = result
 
         if not email_verified:
             return {
-                "login": False,
-                "message": "Email not verified"
+                "login": False
             }
 
         if not bcrypt.checkpw(password.encode(), stored_hash.encode()):
             return {
-                "login": False,
-                "message": "Incorrect password"
+                "login": False
             }
 
         return {
-            "login": True,
-            "message": "Login successful"
+            "login": True
         }
 
     except mysql.connector.Error:
         return {
-            "login": False,
-            "message": "Internal server error"
+            "login": False
         }
 
     finally:
@@ -61,15 +71,3 @@ def login_user(username: str, password: str):
             cursor.close()
         if 'connection' in locals() and connection.is_connected():
             connection.close()
-
-
-# TEST RUNNER (TEMPORARY) ****
-if __name__ == "__main__":
-    print("=== LOGIN TEST ===")
-    username = input("Username: ")
-    password = input("Password: ")
-
-    response = login_user(username, password)
-
-    print("\nRESPONSE:")
-    print(json.dumps(response, indent=2))

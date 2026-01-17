@@ -1,6 +1,6 @@
 import mysql.connector
 
-# database configuration
+# ---------- DATABASE CONFIG ----------
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
@@ -9,62 +9,68 @@ DB_CONFIG = {
     "port": 3306
 }
 
-# Verify email function
-def verify_email(username: str, code: str):
+# ---------- EMAIL VERIFICATION (JSON IN / JSON OUT) ----------
+def verify_email(payload: dict) -> dict:
+    """
+    Expected payload:
+    {
+      "code": "493821"
+    }
+    """
+
+    code = payload.get("code")
+
+    if not code:
+        return {
+            "verified": False
+        }
+
     try:
         connection = mysql.connector.connect(**DB_CONFIG)
         cursor = connection.cursor()
 
-        # Fetch stored verification code
+        # Find user by verification code
         query = """
-        SELECT email_verification_code, email_verified
+        SELECT id, email_verified
         FROM users
-        WHERE username = %s
+        WHERE email_verification_code = %s
         """
-        cursor.execute(query, (username,))
+        cursor.execute(query, (code,))
         result = cursor.fetchone()
 
         if not result:
-            return False, "User does not exist"
+            return {
+                "verified": False
+            }
 
-        stored_code, is_verified = result
+        user_id, email_verified = result
 
-        if is_verified:
-            return False, "Email already verified"
+        if email_verified:
+            return {
+                "verified": False
+            }
 
-        if stored_code != code:
-            return False, "Invalid verification code"
-
-        # Mark email as verified and clear the code
+        # Verify email and clear the code
         update_query = """
         UPDATE users
         SET email_verified = TRUE,
             email_verification_code = NULL
-        WHERE username = %s
+        WHERE id = %s
         """
-        cursor.execute(update_query, (username,))
+        cursor.execute(update_query, (user_id,))
         connection.commit()
 
-        return True, "Email verified successfully"
+        return {
+            "verified": True
+        }
 
     except mysql.connector.Error:
-        return False, "Database error during verification"
+        return {
+            "verified": False
+        }
 
     finally:
         if 'cursor' in locals():
             cursor.close()
         if 'connection' in locals() and connection.is_connected():
             connection.close()
-
-
-# test
-if __name__ == "__main__":
-    print("=== EMAIL VERIFICATION ===")
-    username = input("Username: ")
-    code = input("Verification code: ")
-
-    success, message = verify_email(username, code)
-
-    print("\nRESULT:")
-    print("Success:", success)
-    print("Message:", message)
