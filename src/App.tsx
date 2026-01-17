@@ -1,42 +1,25 @@
-import { Routes, Route, Navigate } from "react-router-dom"
-import Login from "./LoginPage"
-import Continue from "./Continue"
-import Home from "./Home"
-import { useSession } from "./session/SessionContext"
-import { ReactNode } from "react"
+// src/App.js
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import LoginPage from './LoginPage.tsx'; // Assume these components are created
+import SignupPage from './SignupPage.tsx';
 
-/* Protect routes that require login */
-function RequireAuth({ children }: { children: ReactNode }) {
-  const { token } = useSession()
-  if (!token) return <Navigate to="/login" replace />
-  return <>{children}</>
-}
 
-export default function App() {
+const App = () => {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      {/* Main UI */}
+      <Route path="/" element={<Home />} />
 
-      <Route
-        path="/continue"
-        element={
-          <RequireAuth>
-            <Continue />
-          </RequireAuth>
-        }
-      />
-
-      <Route
-        path="/home"
-        element={
-          <RequireAuth>
-            <Home />
-          </RequireAuth>
-        }
-      />
-
-      {/* fallback */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Auth */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      {/* <Route path="/contact" element={<Contact />} /> */}
+      
+      {/* Add a fallback route for "page not found" */}
+      <Route path="*" element={<h1>404: Page Not Found</h1>} />
     </Routes>
-  )
-}
+  );
+};
+
+export default App;
