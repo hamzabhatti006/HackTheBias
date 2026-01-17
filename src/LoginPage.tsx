@@ -2,15 +2,13 @@ import "./LoginPage.css";
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from "react";
 
-
 export default function LoginPage() {
   const navigate = useNavigate();
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.MouseEvent) => {
     e.preventDefault();
     setError("");
 
@@ -29,7 +27,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok && data.login) {
-        navigate("/home"); // <-- next page route CHNAGE THIS
+        navigate("/home"); 
       } else {
         setError(data.message || "Login failed");
       }
@@ -38,52 +36,54 @@ export default function LoginPage() {
       console.error(err);
     }
   };
+
   return (
     <div className="login-page">
-      <div className="login-container">
-        
+      <div className="login-wrapper">
         <h2 className="login-title">Login to your account</h2>
         
-      </div>
-
-      <div className="login-container">
         <div className="login-card">
-          <form className="login-form" onSubmit={handleLogin}>
-            <div>
+          <div className="login-form">
+            <div className="form-field">
               <label className="login-label">Username</label>
               <input
                 type="text"
                 className="login-input"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
               />
             </div>
 
-            <div>
+            <div className="form-field">
               <label className="login-label">Password</label>
               <input 
-                  type="password" 
-                  className="login-input" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                type="password" 
+                className="login-input" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+              />
             </div>
-            {error && <p style={{ color: "red" }}>{error}</p>}
+
+            {error && <div className="error-message">{error}</div>}
 
             <Link to="/forgot-password" className="login-forgot">
               Forgot password?
             </Link>
 
-
-            <button type="submit" className="login-button">
+            <button onClick={handleLogin} className="login-button">
               Login
             </button>
-            <Link to="/signup" className="create-account">
-              Create account?
-            </Link>
 
-          </form>
-          
+            <div className="divider">
+              <span className="divider-text">or</span>
+            </div>
+
+            <Link to="/signup" className="create-account">
+              Don't have an account? Create one
+            </Link>
+          </div>
         </div>
       </div>
     </div>

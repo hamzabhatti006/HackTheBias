@@ -4,6 +4,10 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
 import bcrypt
+import random
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
 CORS(app)  # allow frontend to call backend
@@ -15,6 +19,50 @@ DB_CONFIG = {
     "database": "silent_speak_db",
     "port": 3306
 }
+
+# SMTP Configuration
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+SMTP_EMAIL = "your_email@gmail.com"
+SMTP_PASSWORD = "your_app_password"
+
+# ---------- HELPER FUNCTIONS ----------
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+def generate_verification_code() -> str:
+    return str(random.randint(100000, 999999))
+
+def send_verification_email(to_email: str, code: str):
+    message = MIMEMultipart()
+    message["From"] = SMTP_EMAIL
+    message["To"] = to_email
+    message["Subject"] = "SilentSpeak Email Verification"
+
+    body = f"""
+Welcome to SilentSpeak!
+
+Your verification code is:
+
+{code}
+
+Enter this code in the app to verify your email.
+"""
+    message.attach(MIMEText(body, "plain"))
+
+    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        server.starttls()
+        server.login(SMTP_EMAIL, SMTP_PASSWORD)
+        server.send_message(message)
+
+def username_exists(cursor, username):
+    cursor.execute("SELECT id FROM users WHERE username = %s", (username,))
+    return cursor.fetchone() is not None
+
+def email_exists(cursor, email):
+    cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
+    return cursor.fetchone() is not None
 
 def login_user(username: str, password: str):
     try:
@@ -100,39 +148,77 @@ def login():
     else:
         return jsonify(result), 401
 
-# Helper endpoint to create a test user (REMOVE IN PRODUCTION)
-@app.post("/create-test-user")
-def create_test_user():
+
+@app.post("/signup")
+def signup():
+    data = request.get_json()
+    username = data.get("username", "").strip()
+    password = data.get("password", "")
+    email0 = data.get("email0", "").strip()
+    email1 = data.get("email1", "").strip()
+    name = data.get("name", "").strip()  # ✅ Add this
+    
+    app.logger.info(f"Signup attempt for username: {username}")
+    
+    # Validate input
+    if not username or not password or not email0 or not email1 or not name:  # ✅ Add name check
+        return jsonify({"success": False, "message": "All fields are required"}), 400
+    
+    # Check if emails match
+    if email0 != email1:
+        return jsonify({"success": False, "message": "Emails do not match"}), 400
+    
+    # Validate email format (basic check)
+    if "@" not in email0 or "." not in email0:
+        return jsonify({"success": False, "message": "Invalid email format"}), 400
+    
+    if len(password) < 8:
+        return jsonify({"success": False, "message": "Password must be at least 8 characters"}), 400
+    
     try:
-        username = "testuser"
-        password = "test123"
-        
-        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        
         connection = mysql.connector.connect(**DB_CONFIG)
         cursor = connection.cursor()
         
+        # Check if username already exists
+        cursor.execute("SELECT username FROM users WHERE username = %s", (username,))
+        if cursor.fetchone():
+            return jsonify({"success": False, "message": "Username already exists"}), 409
+        
+        # Check if email already exists
+        cursor.execute("SELECT email FROM users WHERE email = %s", (email0,))
+        if cursor.fetchone():
+            return jsonify({"success": False, "message": "Email already registered"}), 409
+        
+        # Hash the password
+        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        
+        app.logger.info(f"Generated hash for {username}: {password_hash}")
+        
+        # Insert new user with name ✅ UPDATED
         cursor.execute("""
-            INSERT INTO users (username, password_hash, email_verified)
-            VALUES (%s, %s, 1)
-        """, (username, hashed))
+            INSERT INTO users (username, name, email, password_hash, email_verified)
+            VALUES (%s, %s, %s, %s, 0)
+        """, (username, name, email0, password_hash))
         
         connection.commit()
         
+        app.logger.info(f"User {username} created successfully")
+        
         return jsonify({
             "success": True,
-            "message": f"Test user created: username='testuser', password='test123'",
-            "hash": hashed
-        }), 200
+            "message": "Account created successfully! Please verify your email."
+        }), 201
         
     except mysql.connector.Error as e:
-        # app.logger.exception(f"Error creating test user: {e}")
-        return jsonify({"success": False, "message": str(e)}), 500
+        app.logger.exception(f"DB error during signup: {e}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+    except Exception as e:
+        app.logger.exception(f"Unexpected error during signup: {e}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
     finally:
         if 'cursor' in locals():
             cursor.close()
         if 'connection' in locals() and connection.is_connected():
             connection.close()
-
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

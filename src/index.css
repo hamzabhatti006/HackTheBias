@@ -105,7 +105,14 @@ html, body, #root {
   justify-content: center;
   align-items: center;
 }
+/* Hide scrollbar for Chrome, Safari and Opera */
+body::-webkit-scrollbar {
+  display: none;
+}
 
+body {
+  overflow: hidden;
+}
 
 
 
