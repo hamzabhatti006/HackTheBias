@@ -167,14 +167,6 @@ export default function VerifyEmailPage() {
           </div>
         </form>
 
-        {/* <div className="back-section">
-          <button
-            onClick={() => navigate('/login')}
-            className="back-button"
-          >
-            ← Back to Login
-          </button>
-        </div> */}
       </div>
     </div>
   );
