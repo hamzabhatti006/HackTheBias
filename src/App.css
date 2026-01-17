@@ -41,3 +41,72 @@
 .read-the-docs {
   color: #888;
 }
+/* Custom Scrollbar Styling */
+/* Add this to your global CSS file (e.g., index.css or App.css) */
+
+/* For Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #334155, #475569);
+  border-radius: 10px;
+  border: 2px solid #0f172a;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #475569, #64748b);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #64748b, #94a3b8);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #475569 #0f172a;
+}
+
+/* Optional: Thin scrollbar variant */
+/* Uncomment this section if you prefer a thinner scrollbar */
+/*
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 1px solid #0f172a;
+}
+*/
+
+/* Optional: Auto-hide scrollbar (only shows on hover) */
+/* Uncomment this section if you want the scrollbar to hide when not hovering */
+/*
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 10px;
+}
+
+body:hover ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #334155, #475569);
+  border: 2px solid #0f172a;
+}
+*/

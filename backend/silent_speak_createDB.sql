@@ -27,5 +27,5 @@ CREATE TABLE user_progress (
 
     CONSTRAINT fk_user_progress_user
       FOREIGN KEY (user_id) REFERENCES users(id)
-      ON DELETE CASCAD
+      ON DELETE CASCADE
 );

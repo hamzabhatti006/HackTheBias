@@ -1,88 +1,116 @@
 import "./SignupPage.css";
 import { useState } from "react";
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function SignupPage() {
-  const [email, setEmail] = useState("");
+  const [email0, setEmail0] = useState("");
+  const [email1, setEmail1] = useState("");
   const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const handleSubmit = async (e: React.FormEvent) => {
-  console.log("handleSubmit called!");
-  e.preventDefault();
 
-  try {
-    const response = await fetch("http://localhost:5000/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        username,
-        password,
-      }),
-    });
+  const handleSubmit = async (e: React.MouseEvent) => {
+    e.preventDefault();
 
-    const data = await response.json();
-    console.log("Response:", data);
-    console.log("Sent:", email, username, password);
-    if (response.ok) {
+    if (email0 !== email1) {
+      alert("Emails do not match!");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email0,
+          email1,
+          username,
+          name,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Response:", data);
+
+      if (response.ok) {
+        alert(data.message);
         navigate('/verify-email'); 
+      } else {
+        alert(data.message);
       }
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Network error. Please try again.");
+    }
+  };
+
   return (
-    <div className="login-page">
-      <div className="login-container">
+    <div className="signup-page">
+      <div className="signup-wrapper">
+        <h2 className="signup-title">Create an account</h2>
         
-        <h2 className="login-title">Create an account     </h2>
-                                    
-      </div>
+        <div className="signup-card">
+          <div className="signup-form">
+            <div className="form-grid">
+              <div className="form-field">
+                <label className="form-label">Email address</label>
+                <input 
+                  type="email" 
+                  className="form-input"
+                  value={email0}
+                  onChange={(e) => setEmail0(e.target.value)}
+                />
+              </div>
 
-      <div className="login-container">
-        <div className="login-card">
-          <form className="login-form" onSubmit={handleSubmit}>
-            <div>
-              <label className="login-label">Email address</label>
-              <input 
-                type="email" 
-                className="login-input" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <div className="form-field">
+                <label className="form-label">Confirm email</label>
+                <input 
+                  type="email" 
+                  className="form-input"
+                  value={email1}
+                  onChange={(e) => setEmail1(e.target.value)}
+                />
+              </div>
+
+              <div className="form-field">
+                <label className="form-label">Name</label>
+                <input 
+                  type="text" 
+                  className="form-input"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+
+              <div className="form-field">
+                <label className="form-label">Username</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="login-label">Username</label>
-              <input
-                type="text"
-                className="login-input"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="login-label">Password</label>
+            <div className="form-field-full">
+              <label className="form-label">Password</label>
               <input 
                 type="password" 
-                className="login-input" 
+                className="form-input"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
-           
-
-            <button type="submit" className="login-button">
+            <button onClick={handleSubmit} className="signup-button">
               Sign Up
             </button>
-
-          </form>
-          
+          </div>
         </div>
       </div>
     </div>
