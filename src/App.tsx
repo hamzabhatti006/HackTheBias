@@ -2,6 +2,7 @@
 // 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import WelcomePage from './WelcomePage.tsx';
 import LoginPage from './LoginPage.tsx'; // Assume these components are created
 import SignupPage from './SignupPage.tsx';
 import ResetPasswordPage from './ResetPasswordPage.tsx'
@@ -12,7 +13,8 @@ import Home from './Home.tsx'
 const App = () => {
   return (
     <Routes>
-      <Route path="/" element={<LoginPage />} />
+      <Route path="/" element={<WelcomePage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgot-password" element={<ResetPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
