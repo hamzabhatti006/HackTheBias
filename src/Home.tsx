@@ -67,11 +67,7 @@ export default function Home() {
                       setSelectedLevel(l.id)
                       console.log("Open level:", l.id)
 
-                      if (l.id === 1) navigate("/beginner")
-                      if (l.id === 2) navigate("/intermediate")
-                      if (l.id === 3) navigate("/expert")
-                      if (l.id === 4) navigate("/pro")
-                      // navigate(levelRoutes[l.id])
+                      navigate(levelRoutes[l.id])
                     }}
                   >
                     <div
