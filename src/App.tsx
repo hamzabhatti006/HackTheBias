@@ -8,6 +8,7 @@ import ResetPasswordPage from './ResetPasswordPage.tsx'
 import VerifyEmailPage from './VerifyEmailPage.tsx';
 import Home from './Home.tsx'
 import Beginner from './Beginner.tsx'
+import Intermediate from './Intermediate.tsx'
 
 
 const App = () => {
@@ -19,6 +20,7 @@ const App = () => {
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/home" element={<Home />}/>
       <Route path="/beginner" element={<Beginner />}/>
+      <Route path="/intermediate" element={<Intermediate />}/>
       <Route path="*" element={<h1>404: Page Not Found</h1>} />
     </Routes>
   );

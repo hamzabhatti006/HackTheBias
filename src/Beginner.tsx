@@ -2,13 +2,15 @@ import "./Beginner.css";
 import React, { useState, useEffect } from "react";
 import { ChevronRight, RotateCcw } from "lucide-react";
 
+type Mode = "intro" | "learning" | "quiz" | "results";
+
 const Beginner = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [mode, setMode] = useState("learning"); // 'learning' or 'quiz'
+  const [mode, setMode] = useState<Mode>("intro");
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
-  const [showResults, setShowResults] = useState(false);
+  const [shownHints, setShownHints] = useState<Record<number, boolean>>({});
 
   const letters = [
     { letter: "A", instruction: "Make a fist with your thumb on the side", image: "✊" },
@@ -19,10 +21,11 @@ const Beginner = () => {
     { letter: "F", instruction: "Touch thumb and index finger, other fingers up", image: "👌" }
   ];
 
-  const fullText =
-    mode === "learning"
-      ? `Learn the letter "${letters[currentIndex].letter}"`
-      : "Time to test your knowledge!";
+  const fullText = (() => {
+    if (mode === "intro") return "Beginner track";
+    if (mode === "learning") return `Learn the letter "${letters[currentIndex].letter}"`;
+    return "Time to test your knowledge!";
+  })();
 
   useEffect(() => {
     setDisplayedText("");
@@ -48,6 +51,7 @@ const Beginner = () => {
     } else {
       setMode("quiz");
       setCurrentIndex(0);
+      setShownHints({});
     }
   };
 
@@ -55,13 +59,18 @@ const Beginner = () => {
     setQuizAnswers({ ...quizAnswers, [index]: (answer || "").toUpperCase() });
   };
 
-  const handleSubmitQuiz = () => setShowResults(true);
+  const handleSubmitQuiz = () => setMode("results");
+
+  const handleStartTrack = () => {
+    setMode("learning");
+    setCurrentIndex(0);
+  };
 
   const handleRestart = () => {
     setCurrentIndex(0);
     setMode("learning");
     setQuizAnswers({});
-    setShowResults(false);
+    setShownHints({});
   };
 
   const calculateScore = () => {
@@ -87,6 +96,34 @@ const Beginner = () => {
       </h1>
     </div>
   );
+
+  if (mode === "intro") {
+
+    return (
+      <Wrapper>
+        <Title />
+
+        <div className="beginner-introPanel">
+          <div className="beginner-emoji">👋</div>
+          <h2 className="beginner-introTitle">Start learning the ASL alphabet</h2>
+          <p className="beginner-introSubtitle">
+            Work through {letters.length} signs, then take a short quiz. Use hints whenever you get
+            stuck.
+          </p>
+          <ul className="beginner-introList">
+            <li>Step-by-step sign instructions</li>
+            <li>Quick quiz to check recall</li>
+            <li>Hints available during the quiz</li>
+          </ul>
+        </div>
+
+        <button className="beginner-btn primary" onClick={handleStartTrack}>
+          <span>Start Beginner Track</span>
+          <ChevronRight size={20} />
+        </button>
+      </Wrapper>
+    );
+  }
 
   if (mode === "learning") {
     const progress = ((currentIndex + 1) / letters.length) * 100;
@@ -122,7 +159,7 @@ const Beginner = () => {
     );
   }
 
-  if (showResults) {
+  if (mode === "results") {
     const score = calculateScore();
     const perfect = score === letters.length;
     const ok = score >= letters.length / 2;
@@ -174,16 +211,32 @@ const Beginner = () => {
         {letters.map((letter, idx) => (
           <div className="beginner-quizRow" key={idx}>
             <span className="beginner-quizEmoji">{letter.image}</span>
-            <input
-              type="text"
-              maxLength={1}
-              value={quizAnswers[idx] || ""}
-              onChange={(e) => handleQuizAnswer(idx, e.target.value)}
-              className="beginner-input"
-              placeholder="?"
-              inputMode="text"
-              aria-label={`Answer for sign ${idx + 1}`}
-            />
+            <div className="beginner-quizContent">
+              <div className="beginner-quizControls">
+                <input
+                  type="text"
+                  maxLength={1}
+                  value={quizAnswers[idx] || ""}
+                  onChange={(e) => handleQuizAnswer(idx, e.target.value)}
+                  className="beginner-input"
+                  placeholder="?"
+                  inputMode="text"
+                  aria-label={`Answer for sign ${idx + 1}`}
+                />
+                <button
+                  type="button"
+                  className="beginner-hintButton"
+                  onClick={() =>
+                    setShownHints((prev) => ({ ...prev, [idx]: !prev[idx] }))
+                  }
+                >
+                  {shownHints[idx] ? "Hide hint" : "Show hint"}
+                </button>
+              </div>
+              {shownHints[idx] && (
+                <p className="beginner-hintText">{letter.instruction}</p>
+              )}
+            </div>
           </div>
         ))}
       </div>
