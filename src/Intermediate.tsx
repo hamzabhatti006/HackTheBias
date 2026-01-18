@@ -37,11 +37,17 @@ export default function Intermediate() {
   const [result, setResult] = useState<CheckResult | null>(null)
   const [promptIndex, setPromptIndex] = useState(0)
 
-  const prompts: SignPrompt[] = [
-    { label: "A", description: "Make a fist with your thumb resting on the side." },
-    { label: "B", description: "Hold a flat open palm with fingers together." },
-    { label: "C", description: "Curve your fingers to form a C shape." },
-  ]
+  const supportedLabels = new Set(["A", "B", "C"])
+  const promptDescriptions: Record<string, string> = {
+    A: "Make a fist with your thumb resting on the side.",
+    B: "Hold a flat open palm with fingers together.",
+    C: "Curve your fingers to form a C shape.",
+  }
+  const prompts: SignPrompt[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((label) => ({
+    label,
+    description:
+      promptDescriptions[label] || `Practice the ${label} fingerspelling handshape.`,
+  }))
 
   useEffect(() => {
     let active = true
@@ -242,7 +248,9 @@ export default function Intermediate() {
                   <strong>Confidence:</strong> {(result.confidence * 100).toFixed(0)}%
                 </p>
                 <p className="result-message">
-                  {result.prediction === "Unknown"
+                  {!supportedLabels.has(result.target)
+                    ? "Recognition currently supports A, B, C only. More letters are coming soon."
+                    : result.prediction === "Unknown"
                     ? "We couldn't recognize that sign yet."
                     : result.match
                     ? "Nice work!"

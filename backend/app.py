@@ -130,13 +130,13 @@ def asl_check():
     landmarks = payload.get("landmarks")
     target = payload.get("target")
 
-    if not landmarks or not target:
+    if not landmarks:
         return jsonify({
             "success": False,
-            "message": "Missing landmarks or target sign"
+            "message": "Missing landmarks"
         }), 400
 
-    target = str(target).upper()
+    target = str(target or "").upper()
 
     if len(landmarks) < 21:
         return jsonify({
@@ -145,11 +145,11 @@ def asl_check():
         }), 400
 
     result = _classify_sign(landmarks)
-    match = result["label"] == target
+    match = result["label"] == target if target else False
 
     return jsonify({
         "success": True,
-        "target": target,
+        "target": target or "Unknown",
         "prediction": result["label"],
         "confidence": result["confidence"],
         "match": match
