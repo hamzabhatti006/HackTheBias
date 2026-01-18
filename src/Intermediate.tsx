@@ -37,11 +37,13 @@ export default function Intermediate() {
   const [result, setResult] = useState<CheckResult | null>(null)
   const [promptIndex, setPromptIndex] = useState(0)
 
-  const supportedLabels = new Set(["A", "B", "C"])
+  const supportedLabels = new Set(["A", "B", "C", "D", "E"])
   const promptDescriptions: Record<string, string> = {
     A: "Make a fist with your thumb resting on the side.",
     B: "Hold a flat open palm with fingers together.",
     C: "Curve your fingers to form a C shape.",
+    D: "Point your index finger up, with other fingers folded in.",
+    E: "Curl all fingers into your palm with the thumb tucked.",
   }
   const prompts: SignPrompt[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((label) => ({
     label,
@@ -196,7 +198,7 @@ export default function Intermediate() {
             scoring.
           </p>
           <p className="intermediate-subtitle">
-            Current recognition supports: A, B, C. Other letters will return
+            Current recognition supports: A, B, C, D, E. Other letters will return
             Unknown until more training data is added.
           </p>
         </header>
@@ -249,7 +251,7 @@ export default function Intermediate() {
                 </p>
                 <p className="result-message">
                   {!supportedLabels.has(result.target)
-                    ? "Recognition currently supports A, B, C only. More letters are coming soon."
+                    ? "Recognition currently supports A–E only. More letters are coming soon."
                     : result.prediction === "Unknown"
                     ? "We couldn't recognize that sign yet."
                     : result.match

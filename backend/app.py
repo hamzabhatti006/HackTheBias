@@ -72,12 +72,11 @@ def _classify_sign(landmarks):
     index_mcp = landmarks[5]
     palm_size = max(_distance(wrist, index_mcp), 0.05)
 
-    fingers_extended = [
-        _finger_extended(landmarks, 8, 6, palm_size),
-        _finger_extended(landmarks, 12, 10, palm_size),
-        _finger_extended(landmarks, 16, 14, palm_size),
-        _finger_extended(landmarks, 20, 18, palm_size),
-    ]
+    index_extended = _finger_extended(landmarks, 8, 6, palm_size)
+    middle_extended = _finger_extended(landmarks, 12, 10, palm_size)
+    ring_extended = _finger_extended(landmarks, 16, 14, palm_size)
+    pinky_extended = _finger_extended(landmarks, 20, 18, palm_size)
+    fingers_extended = [index_extended, middle_extended, ring_extended, pinky_extended]
 
     thumb_tip = landmarks[4]
     thumb_ip = landmarks[3]
@@ -91,15 +90,25 @@ def _classify_sign(landmarks):
     score_a = (curled_count / 4) * 0.7 + (0.3 if thumb_out else 0)
     score_b = (extended_count / 4) * 0.7 + (0.3 if thumb_tucked else 0)
     score_c = 0
+    score_d = 0
+    score_e = 0
 
     if extended_count >= 3 and thumb_out:
         if 0.25 * palm_size <= thumb_index_dist <= 0.8 * palm_size:
             score_c = 0.6 + (0.2 if curled_count <= 1 else 0) + (0.2 if not thumb_tucked else 0)
 
+    if index_extended and not middle_extended and not ring_extended and not pinky_extended:
+        score_d = 0.7 + (0.3 if thumb_tucked else 0)
+
+    if curled_count == 4 and thumb_tucked:
+        score_e = 0.7 + (0.3 if not thumb_out else 0)
+
     scores = {
         "A": round(score_a, 2),
         "B": round(score_b, 2),
         "C": round(score_c, 2),
+        "D": round(score_d, 2),
+        "E": round(score_e, 2),
     }
 
     best_label = max(scores, key=scores.get)
